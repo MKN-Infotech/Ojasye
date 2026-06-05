@@ -21,6 +21,7 @@
   "homepage": "https://github.com/MKN-Infotech/Ojasye#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
+    "groq-sdk": "^1.2.1",
     "next": "^16.2.7",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

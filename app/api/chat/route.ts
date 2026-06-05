@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const SYSTEM_PROMPT = `You are Oja, the AI wellness assistant for Ojasye Wellness Technologies — a science-backed, technology-driven wellness company with the tagline "Feel Better. Perform Better."
 
@@ -28,21 +28,21 @@ export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
+    const response = await client.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages,
+      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
     });
 
-    const content = response.content[0];
-    if (content.type !== "text") {
-      return NextResponse.json({ error: "Unexpected response type" }, { status: 500 });
+    const message = response.choices[0]?.message?.content;
+    if (!message) {
+      return NextResponse.json({ error: "No response from AI" }, { status: 500 });
     }
 
-    return NextResponse.json({ message: content.text });
-  } catch (error) {
-    console.error("Chat API error:", error);
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+    return NextResponse.json({ message });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Chat API error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
